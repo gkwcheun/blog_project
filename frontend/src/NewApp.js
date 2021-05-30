@@ -7,11 +7,12 @@ import NavBar from "./components/NavBar";
 import Signup from "./components/Signup";
 import Profile from "./components/Profile";
 import PostDetail from "./components/PostDetail";
+import PostEditForm from "./components/PostEditForm";
 import { useState } from "react";
 
 function NewApp() {
-	const [userToken, setToken] = useState(null);
-	const [userID, setUserID] = useState(null);
+	const [userToken, setToken] = useState("");
+	const [userID, setUserID] = useState("");
 	const [loggedIn, setLogin] = useState(false);
 	const handleLogin = (userInfo) => {
 		// save jwt to state to be distributed to other components
@@ -52,6 +53,11 @@ function NewApp() {
 						path="/post-detail/:postID"
 						exact
 						render={(props) => <PostDetail {...props} />}
+					/>
+					<Route
+						path="/edit/:postID"
+						exact
+						render={(props) => <PostEditForm {...props} />}
 					/>
 					<Route path="/signup" exact component={Signup} />
 					<Route path="/" exact component={PostList} />

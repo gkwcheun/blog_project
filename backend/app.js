@@ -2,7 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const passport = require("passport");
 const mongoose = require("mongoose");
-const userRouter = require("./routes/user");
+const userRouter = require("./routes/userRoutes");
+const postRouter = require("./routes/postRoutes");
 const indexRouter = require("./routes/index");
 const cors = require("cors");
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", indexRouter);
 app.use("/user", passport.authenticate("jwt", { session: false }), userRouter);
+app.use("/post", passport.authenticate("jwt", { session: false }), postRouter);
 
 mongoose
 	.connect(process.env.DB_URL, {

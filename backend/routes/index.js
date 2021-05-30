@@ -8,6 +8,19 @@ const Post = require("../models/post");
 const Comment = require("../models/comment");
 const router = express.Router();
 
+router.get("/", (req, res, next) => {
+	Post.find({ published: true })
+		.populate("user", "username")
+		.populate("Comment")
+		.exec((err, posts) => {
+			if (err) {
+				res.json({ message: "Error retreiving posts" });
+			} else {
+				res.json({ message: "Successfully retrieved posts", posts: posts });
+			}
+		});
+});
+
 router.post("/signup", (req, res, next) => {
 	User.findOne({ username: req.body.username }, (err, user) => {
 		if (err) return next(err);
@@ -56,19 +69,6 @@ router.post("/login", function (req, res, next) {
 
 router.post("/logout", (req, res, next) => {
 	res.json({ message: "To be implemented" });
-});
-
-router.get("/blog", (req, res, next) => {
-	Post.find({ published: true })
-		.populate("User", "username")
-		.populate("Comment")
-		.exec((err, posts) => {
-			if (err) {
-				res.json({ message: "Error retreiving posts" });
-			} else {
-				res.json({ message: "Successfully retrieved posts", posts: posts });
-			}
-		});
 });
 
 module.exports = router;

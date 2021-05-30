@@ -56,27 +56,37 @@ function Login(props) {
 	} else {
 		return (
 			<div className="main-container">
-				<form>
-					<label for="username" />
-					<input
-						type="text"
-						name="username"
-						placeholder="username"
-						onChange={handleChange}
-						required
-					/>
-					<label for="password" />
-					<input
-						type="password"
-						name="password"
-						placeholder="password"
-						onChange={handleChange}
-						required
-					/>
-					<button onClick={submitUserInfo}>Login</button>
+				<form className="login-form">
+					<div className="form-group">
+						<label htmlFor="username">Username</label>
+						<input
+							className="form-control user-inp"
+							type="text"
+							name="username"
+							placeholder="Enter Username"
+							onChange={handleChange}
+							required
+						/>
+					</div>
+					<div className="form-group">
+						<label htmlFor="password">Password</label>
+						<input
+							className="form-control user-inp"
+							type="password"
+							name="password"
+							placeholder="Enter Password"
+							onChange={handleChange}
+							required
+						/>
+					</div>
 					{wrongUserPwMessage ? (
-						<p className="wrong-pw-msg">{`${wrongUserPwMessage}`}</p>
+						<small className="form-text text-muted error-msg">
+							{wrongUserPwMessage}
+						</small>
 					) : null}
+					<button className="btn btn-primary" onClick={submitUserInfo}>
+						Login
+					</button>
 				</form>
 			</div>
 		);

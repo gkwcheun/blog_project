@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import PostCard from "./PostCard";
 require("dotenv").config();
 
 function PostList() {
 	// get post from DB and render to component
 	const [postList, setPostList] = useState([]);
 	useEffect(() => {
-		let apiURL = "http://localhost:5000/blog";
+		let apiURL = "http://localhost:5000";
 		fetch(apiURL)
 			.then((response) => {
 				if (response.ok) {
@@ -18,18 +19,18 @@ function PostList() {
 				console.log(err);
 			});
 	}, []);
+	const formatPostDate = (dateStr) => {
+		return dateStr;
+	};
+	// useEffect hook to see postList state, for debugging purposes
+	useEffect(() => {
+		console.log(postList);
+	}, [postList]);
 	return (
 		<div className="main-container">
 			<div className="post-list">
 				{postList.map((post) => {
-					return (
-						<div className="post-card" key={post._id}>
-							<h1>
-								<Link to={`/post-detail/${post._id}`}>{post.title}</Link>
-							</h1>
-							<p>{post.content}</p>
-						</div>
-					);
+					return <PostCard post={post} editable={false} />;
 				})}
 			</div>
 		</div>
