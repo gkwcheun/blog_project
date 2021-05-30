@@ -7,7 +7,6 @@ import NavBar from "./components/NavBar";
 import Signup from "./components/Signup";
 import Profile from "./components/Profile";
 import PostDetail from "./components/PostDetail";
-import PostEditForm from "./components/PostEditForm";
 import { useState } from "react";
 
 function NewApp() {
@@ -42,7 +41,14 @@ function NewApp() {
 					<Route
 						path="/create"
 						exact
-						render={(props) => <PostForm {...props} token={userToken} />}
+						render={(props) => (
+							<PostForm
+								{...props}
+								token={userToken}
+								editPost={false}
+								userID={userID}
+							/>
+						)}
 					/>
 					<Route
 						path="/login"
@@ -57,7 +63,9 @@ function NewApp() {
 					<Route
 						path="/edit/:postID"
 						exact
-						render={(props) => <PostEditForm {...props} />}
+						render={(props) => (
+							<PostForm {...props} token={userToken} editPost={true} />
+						)}
 					/>
 					<Route path="/signup" exact component={Signup} />
 					<Route path="/" exact component={PostList} />

@@ -13,7 +13,7 @@ router.get("/post-detail/:postID", (req, res, next) => {
 					message: "An error has occured fetching post data",
 					err: err,
 				});
-			} else if (user) {
+			} else if (post) {
 				res.json({ post });
 			}
 		});
@@ -43,15 +43,13 @@ router.post("/create-post", (req, res, next) => {
 	});
 });
 
-router.put("/update-post/:postID", (req, res, next) => {
+router.patch("/update-post/:postID", (req, res, next) => {
 	Post.findByIdAndUpdate(
 		req.params.postID,
 		{
 			// how to only update the content that was changed?
-			// title: req.body.title ? req.body.title : null,
-			// published: req.body.toBePublished ? req.body.toBePublished : null,
-			// content: req.body.content ? req.body.content : null,
-			...req.body.post,
+			title: req.body.title,
+			content: req.body.content,
 			datePosted: Date.now(),
 		},
 		{ useFindAndModify: false },
