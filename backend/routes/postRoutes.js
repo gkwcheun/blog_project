@@ -50,6 +50,7 @@ router.patch("/update-post/:postID", (req, res, next) => {
 			// how to only update the content that was changed?
 			title: req.body.title,
 			content: req.body.content,
+			published: req.body.toBePublished,
 			datePosted: Date.now(),
 		},
 		{ useFindAndModify: false },

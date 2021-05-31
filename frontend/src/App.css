@@ -95,3 +95,7 @@ a:hover {
 .post-control-btn{
     margin: 1px;
 }
+
+.draft-text {
+    color: red;
+}

@@ -18,7 +18,6 @@ function PostForm(props) {
 	};
 
 	const afterEditSubmit = (e = null) => {
-		console.log("after submit called");
 		if (e) {
 			e.preventDefault();
 		}
@@ -36,7 +35,6 @@ function PostForm(props) {
 	const submitPost = async (e) => {
 		// submit post data to database
 		e.preventDefault();
-		setPost({ ...post, toBePublished: true });
 		const postRequest = await fetch(apiURLS.create, {
 			method: "POST",
 			headers: {
@@ -44,22 +42,20 @@ function PostForm(props) {
 				Accept: "application/json",
 				Authorization: `Bearer ${props.token}`,
 			},
-			body: JSON.stringify({ title: post.title, content: post.content }),
+			body: JSON.stringify({ ...post, toBePublished: true }),
 		});
 		if (postRequest.ok) {
 			const postResponse = await postRequest.json();
-			console.log(post);
-			console.log(postResponse);
 		} else {
 			console.log("Error adding post to database");
 		}
 		clearFields();
+		console.log(JSON.stringify({ ...post }));
 		setAfterEditLink(props.userID);
 	};
 
 	const saveDraft = async (e) => {
 		e.preventDefault();
-		setPost({ ...post, toBePublished: false });
 		// function to save non-published posts to DB
 		const postRequest = await fetch(apiURLS.create, {
 			method: "POST",
@@ -72,7 +68,6 @@ function PostForm(props) {
 		});
 		if (postRequest.ok) {
 			const postResponse = await postRequest.json();
-			console.log(postResponse);
 		} else {
 			console.log("Error adding post to database");
 		}
@@ -97,7 +92,16 @@ function PostForm(props) {
 	const submitPostEdit = async (e) => {
 		// Submit edited post, TO BE IMPLEMENTED
 		e.preventDefault();
-		console.log(JSON.stringify(post));
+		let postData = {
+			title: post.title,
+			content: post.content,
+		};
+		if (e.target.name === "publish-btn") {
+			console.log("publishing");
+			postData.toBePublished = true;
+		} else {
+			postData.toBePublished = false;
+		}
 		const updateResponse = await fetch(apiURLS.update, {
 			method: "PATCH",
 			headers: {
@@ -105,7 +109,7 @@ function PostForm(props) {
 				Accept: "application/json",
 				Authorization: `Bearer ${props.token}`,
 			},
-			body: JSON.stringify({ title: post.title, content: post.content }),
+			body: JSON.stringify(postData),
 		});
 		if (updateResponse.ok) {
 			// if successfull, redirect to profile page
@@ -137,7 +141,6 @@ function PostForm(props) {
 
 	if (afterEditLink) {
 		// redirect user after post submit, post edit, or cancel
-		console.log("redirecting");
 		return <Redirect to={`/profile/${afterEditLink}`} />;
 	}
 
@@ -174,9 +177,17 @@ function PostForm(props) {
 						<div className="btn-container">
 							<button
 								className="btn btn-primary post-submit-btn"
+								name="publish-btn"
 								onClick={submitPostEdit}
 							>
-								Submit
+								Publish
+							</button>
+							<button
+								className="btn btn-primary post-save-btn"
+								name="save-draft-btn"
+								onClick={submitPostEdit}
+							>
+								Save Draft
 							</button>
 							<button
 								className="btn btn-primary post-save-btn"

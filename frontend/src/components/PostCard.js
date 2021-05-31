@@ -18,6 +18,12 @@ function PostCard(props) {
 				<small className="card-subtitle mb-2 text-muted">
 					{props.post.datePosted}
 				</small>
+				<br />
+				{props.post.published ? null : (
+					<small className="card-subtitle mb-2 draft-text">
+						<strong>DRAFT</strong>
+					</small>
+				)}
 			</div>
 			<p className="card-text">{props.post.content}</p>
 			{props.editable ? (

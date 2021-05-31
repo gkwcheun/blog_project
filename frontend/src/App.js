@@ -4,85 +4,73 @@ import PostList from "./components/PostList";
 import Login from "./components/Login";
 import PostForm from "./components/PostForm";
 import NavBar from "./components/NavBar";
-import AuthedApp from "./components/AuthedApp";
-import { useState, useEffect } from "react";
+import Signup from "./components/Signup";
+import Profile from "./components/Profile";
+import PostDetail from "./components/PostDetail";
+import { useState } from "react";
 
 function App() {
 	const [userToken, setToken] = useState("");
+	const [userID, setUserID] = useState("");
 	const [loggedIn, setLogin] = useState(false);
-	const [toggleLogin, setToggleLogin] = useState(false);
-	const [postForm, setPostForm] = useState(false);
-	const [updateForm, setUpdateForm] = useState(false);
-	const [deleteForm, setDeleteForm] = useState(false);
-	const [toggleProfile, setProfilePage] = useState(false);
-	const [togglePostList, setPostList] = useState(false);
-	const handleLogin = (token) => {
+	const handleLogin = (userInfo) => {
 		// save jwt to state to be distributed to other components
-		setToken(token);
+		setToken(userInfo.token);
+		setUserID(userInfo.userID);
 		setLogin(true);
-		setToggleLogin(false);
 	};
 	const handleLogout = () => {
 		setToken("");
 		setLogin(false);
 	};
-	const toggleLoginForm = () => {
-		setToggleLogin(true);
-	};
-	const togglePostForm = () => {
-		// function to toggle post form when creating new post
-		setPostForm(true);
-	};
-	const toggleProfileView = () => {
-		// Get user profile, render profile component to the screen
-		setProfilePage(true);
-	};
+
 	return (
-		<div className="App">
-			{/* {toggleLogin ? (
-				<Login handleLogin={handleLogin} />
-			) : (
-				<div className="mainBody">
-					<nav className="navBar">
-						<h1>Logo</h1>
-						<ul>
-							{loggedIn ? (
-								<div className="authed-nav">
-									<li onClick={fetchProfile}>Profile</li>
-									<li onClick={togglePostForm}>New Post</li>
-									<li onClick={handleLogout}>Logout</li>
-								</div>
-							) : (
-								<div className="preauth-nav">
-									<li onClick={toggleLoginForm}>Login</li>
-								</div>
-							)}
-						</ul>
-					</nav>
-					<PostList />
-				</div>
-			)} */}
-			<NavBar
-				loginStatus={loggedIn}
-				showPostList={togglePostList}
-				showLoginForm={toggleLoginForm}
-				showProfileForm={toggleProfileView}
-				showPostForm={togglePostForm}
-				submitLogout={handleLogout}
-			/>
-			{/* Check login status, if logged in then show authenticated view, if not just post list */}
-			<AppBody />
-			{loggedIn ? (
-				<AuthedApp
-					token={userToken}
-					createPost={postForm}
-					showProfile={toggleProfile}
-					deletePost={deleteForm}
-					updatePost={updateForm}
+		<div className="app-body">
+			<Router>
+				<NavBar
+					loggedIn={loggedIn}
+					userID={userID}
+					handleLogout={handleLogout}
 				/>
-			) : (
-				<PostList />
-			)}
+				<Switch>
+					<Route
+						path="/profile/:userID"
+						exact
+						render={(props) => <Profile {...props} token={userToken} />}
+					/>
+					<Route
+						path="/create"
+						exact
+						render={(props) => (
+							<PostForm
+								{...props}
+								token={userToken}
+								editPost={false}
+								userID={userID}
+							/>
+						)}
+					/>
+					<Route
+						path="/login"
+						exact
+						render={(props) => <Login {...props} handleLogin={handleLogin} />}
+					/>
+					<Route
+						path="/post-detail/:postID"
+						exact
+						render={(props) => <PostDetail {...props} />}
+					/>
+					<Route
+						path="/edit/:postID"
+						exact
+						render={(props) => (
+							<PostForm {...props} token={userToken} editPost={true} />
+						)}
+					/>
+					<Route path="/signup" exact component={Signup} />
+					<Route path="/" exact component={PostList} />
+				</Switch>
+			</Router>
 		</div>
 	);
 }
