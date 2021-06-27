@@ -56,7 +56,7 @@ function Login(props) {
 	} else {
 		return (
 			<div className="main-container">
-				<form className="login-form">
+				<form className="form-padding">
 					<div className="form-group">
 						<label htmlFor="username">Username</label>
 						<input

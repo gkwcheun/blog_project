@@ -34,9 +34,9 @@ function Profile(props) {
 		setPostLink(null);
 	}, []);
 	// logging profile state for debugging reasons
-	useEffect(() => {
-		console.log(profile);
-	}, [profile]);
+	// useEffect(() => {
+	// 	console.log(profile);
+	// }, [profile]);
 
 	const editPost = (e) => {
 		e.preventDefault();

@@ -5,6 +5,7 @@ import { Redirect } from "react-router-dom";
 // if editing, post form should prepopulate with content of original form
 function PostForm(props) {
 	const [post, setPost] = useState({ toBePublished: false });
+	const [postImage, setPostImage] = useState(null);
 	const [afterEditLink, setAfterEditLink] = useState(null);
 
 	const apiURLS = {
@@ -13,8 +14,12 @@ function PostForm(props) {
 	};
 
 	const handleChange = (e) => {
-		let postData = { ...post, [e.target.name]: e.target.value };
-		setPost(postData);
+		if (e.target.name === "postImage") {
+			setPostImage(e.target.files[0]);
+		} else {
+			let postData = { ...post, [e.target.name]: e.target.value };
+			setPost(postData);
+		}
 	};
 
 	const afterEditSubmit = (e = null) => {
@@ -30,19 +35,31 @@ function PostForm(props) {
 		postTitle.value = "";
 		let postContent = document.getElementById("postContent");
 		postContent.value = "";
+		let postImage = document.getElementById("postImage");
+		postImage.value = null;
+	};
+
+	const getFormData = () => {
+		const formData = new FormData();
+		formData.append("title", post.title);
+		formData.append("content", post.content);
+		if (postImage) {
+			formData.append("postImage", postImage);
+		}
+		return formData;
 	};
 
 	const submitPost = async (e) => {
 		// submit post data to database
 		e.preventDefault();
+		let formData = getFormData();
+		formData.append("toBePublished", true);
 		const postRequest = await fetch(apiURLS.create, {
 			method: "POST",
 			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
 				Authorization: `Bearer ${props.token}`,
 			},
-			body: JSON.stringify({ ...post, toBePublished: true }),
+			body: formData,
 		});
 		if (postRequest.ok) {
 			const postResponse = await postRequest.json();
@@ -50,21 +67,21 @@ function PostForm(props) {
 			console.log("Error adding post to database");
 		}
 		clearFields();
-		console.log(JSON.stringify({ ...post }));
 		setAfterEditLink(props.userID);
 	};
 
 	const saveDraft = async (e) => {
 		e.preventDefault();
 		// function to save non-published posts to DB
+		// get formData, append toBePublished to be false for save draft
+		let formData = getFormData();
+		formData.append("toBePublished", false);
 		const postRequest = await fetch(apiURLS.create, {
 			method: "POST",
 			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
 				Authorization: `Bearer ${props.token}`,
 			},
-			body: JSON.stringify(post),
+			body: formData,
 		});
 		if (postRequest.ok) {
 			const postResponse = await postRequest.json();
@@ -85,31 +102,50 @@ function PostForm(props) {
 		});
 		if (postDetailResponse.ok) {
 			const postData = await postDetailResponse.json();
-			setPost({ ...postData.post });
+			console.log(postData);
+			let postState = {
+				title: postData.post.title,
+				content: postData.post.content,
+				published: postData.post.published,
+			};
+			setPost({ ...postState });
 		}
 	};
 
 	const submitPostEdit = async (e) => {
 		// Submit edited post, TO BE IMPLEMENTED
 		e.preventDefault();
-		let postData = {
-			title: post.title,
-			content: post.content,
-		};
+		// let postData = {
+		// 	title: post.title,
+		// 	content: post.content,
+		// };
+		// if (e.target.name === "publish-btn") {
+		// 	console.log("publishing");
+		// 	postData.toBePublished = true;
+		// } else {
+		// 	postData.toBePublished = false;
+		// }
+		// const updateResponse = await fetch(apiURLS.update, {
+		// 	method: "PATCH",
+		// 	headers: {
+		// 		"Content-Type": "application/json",
+		// 		Accept: "application/json",
+		// 		Authorization: `Bearer ${props.token}`,
+		// 	},
+		// 	body: JSON.stringify(postData),
+		// });
+		let formData = getFormData();
 		if (e.target.name === "publish-btn") {
-			console.log("publishing");
-			postData.toBePublished = true;
+			formData.append("toBePublished", true);
 		} else {
-			postData.toBePublished = false;
+			formData.append("toBePublished", false);
 		}
 		const updateResponse = await fetch(apiURLS.update, {
 			method: "PATCH",
 			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
 				Authorization: `Bearer ${props.token}`,
 			},
-			body: JSON.stringify(postData),
+			body: formData,
 		});
 		if (updateResponse.ok) {
 			// if successfull, redirect to profile page
@@ -135,6 +171,11 @@ function PostForm(props) {
 		console.log(post);
 	}, [post]);
 
+	// use effect function just to see state for debugging purposes
+	useEffect(() => {
+		console.log(postImage);
+	}, [postImage]);
+
 	useEffect(() => {
 		console.log(afterEditLink);
 	}, [afterEditLink]);
@@ -146,7 +187,7 @@ function PostForm(props) {
 
 	return (
 		<div className="main-container">
-			<form className="post-form">
+			<form encType="multipart/form-data" className="post-form">
 				<div className="form-group">
 					<label htmlFor="title">Title</label>
 					<input
@@ -172,6 +213,23 @@ function PostForm(props) {
 						required
 					/>
 				</div>
+				<div className="form-group">
+					<label htmlFor="postImage">Image</label>
+					<input
+						className="form-control-file"
+						id="postImage"
+						type="file"
+						accept=".png .jpg .jpeg"
+						name="postImage"
+						onChange={handleChange}
+					/>
+					{props.editPost ? (
+						<small className="card-subtitle mb-2 text-muted user-subtitle">
+							Overwrites original image
+						</small>
+					) : null}
+				</div>
+				<input type="hidden" name="toBePublished" />
 				<div className="btn-container">
 					{props.editPost ? (
 						<div className="btn-container">
