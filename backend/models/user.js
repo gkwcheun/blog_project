@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
 	username: { type: String, required: true },
 	password: { type: String, required: true },
+	profilePicture: { data: Buffer, contentType: String },
 	posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
 });
 
