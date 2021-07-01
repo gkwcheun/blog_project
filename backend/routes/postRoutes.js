@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const User = require("../models/user");
 const Post = require("../models/post");
+const Comment = require("../models/comment");
 
 // multer config for photo upload
 const storage = multer.diskStorage({
@@ -31,6 +32,7 @@ router.get("/post-detail/:postID", (req, res, next) => {
 	// get post with postID, return json data of post to frontend
 	Post.findById(req.params.postID)
 		.populate("comments")
+		.populate("user", "username")
 		.exec((err, post) => {
 			if (err) {
 				res.json({
@@ -41,6 +43,26 @@ router.get("/post-detail/:postID", (req, res, next) => {
 				res.json({ post });
 			}
 		});
+});
+
+router.post("/comments/:postID", (req, res, next) => {
+	// post comment and associated user to DB, add comment ID to post
+	let comment = new Comment({
+		user: req.body.user,
+		comment: req.body.comment,
+	}).save((err, comment) => {
+		if (err) return next(err);
+		console.log(comment);
+		Post.findByIdAndUpdate(
+			req.params.postID,
+			{ $push: { comments: comment._id } },
+			{ useFindAndModify: false },
+			(err, post) => {
+				if (err) res.json({ err: err });
+				res.json({ message: "New Comment Added!" });
+			}
+		);
+	});
 });
 
 router.post("/create-post", upload.single("postImage"), (req, res, next) => {
@@ -60,7 +82,6 @@ router.post("/create-post", upload.single("postImage"), (req, res, next) => {
 		datePosted: Date.now(),
 	}).save((err, post) => {
 		if (err) return next(err);
-		console.log(post);
 		User.findByIdAndUpdate(
 			req.user._id,
 			{ $push: { posts: post._id } },
@@ -77,23 +98,25 @@ router.patch(
 	"/update-post/:postID",
 	upload.single("postImage"),
 	(req, res, next) => {
-		let postData = { ...req.body };
+		let postData = {
+			title: req.body.title,
+			content: req.body.content,
+			datePosted: Date.now(),
+			published: req.body.toBePublished === "true",
+		};
 		// if there is an image file uploaded on edit, overwrite old file
 		// if not only update what is in the rest of update form
+
 		if (req.file) {
 			postData.image = {
 				data: fs.readFileSync(req.file.path),
 				contentType: "image/jpg",
 			};
 		}
+
 		Post.findByIdAndUpdate(
 			req.params.postID,
 			{
-				// how to only update the content that was changed?
-				// title: req.body.title,
-				// content: req.body.content,
-				// published: req.body.toBePublished,
-				// datePosted: Date.now(),
 				...postData,
 			},
 			{ useFindAndModify: false },
