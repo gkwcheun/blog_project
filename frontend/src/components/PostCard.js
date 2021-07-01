@@ -14,7 +14,6 @@ function PostCard(props) {
 	// useEffect hook to set imgLink on component mount if there is image in post
 	useEffect(() => {
 		if (props.post.image) {
-			console.log("setting image source");
 			let base64flag = "data:image/jpeg;base64, ";
 			let source = base64flag + arrayBufferToBase64(props.post.image.data.data);
 			setImgSrc(source);
@@ -22,11 +21,11 @@ function PostCard(props) {
 	}, []);
 
 	// used for debugging purposes, see if imgSrc is being set properly
-	useEffect(() => {
-		if (imgSrc) {
-			console.log(imgSrc);
-		}
-	}, [imgSrc]);
+	// useEffect(() => {
+	// 	if (imgSrc) {
+	// 		console.log(imgSrc);
+	// 	}
+	// }, [imgSrc]);
 
 	return (
 		<div className="card" key={props.post._id}>
@@ -56,7 +55,11 @@ function PostCard(props) {
 			</div>
 			<p className="card-text">{props.post.content}</p>
 			{imgSrc ? (
-				<img className="card-img-bottom" src={imgSrc} alt="post image" />
+				<img
+					className="card-img-bottom post-image"
+					src={imgSrc}
+					alt="post image"
+				/>
 			) : null}
 			{props.editable ? (
 				<div className="post-control">
@@ -77,6 +80,17 @@ function PostCard(props) {
 				</div>
 			) : null}
 			{/* Comments section to be implemented */}
+			{props.commentable ? (
+				<div className="post-control">
+					<button
+						className="btn btn-primary post-control-btn"
+						id={props.post._id}
+						onClick={props.commentPost}
+					>
+						Comment
+					</button>
+				</div>
+			) : null}
 		</div>
 	);
 }

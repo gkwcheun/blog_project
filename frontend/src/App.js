@@ -8,6 +8,7 @@ import Signup from "./components/Signup";
 import Profile from "./components/Profile";
 import PostDetail from "./components/PostDetail";
 import { useState } from "react";
+require("dotenv").config();
 
 function App() {
 	const [userToken, setToken] = useState("");
@@ -58,13 +59,20 @@ function App() {
 					<Route
 						path="/post-detail/:postID"
 						exact
-						render={(props) => <PostDetail {...props} />}
+						render={(props) => (
+							<PostDetail {...props} token={userToken} userID={userID} />
+						)}
 					/>
 					<Route
 						path="/edit/:postID"
 						exact
 						render={(props) => (
-							<PostForm {...props} token={userToken} editPost={true} />
+							<PostForm
+								{...props}
+								token={userToken}
+								editPost={true}
+								userID={userID}
+							/>
 						)}
 					/>
 					<Route path="/signup" exact component={Signup} />

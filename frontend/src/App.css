@@ -70,6 +70,15 @@ a:hover {
     margin: 10px;
 }
 
+.post-image {
+    max-height: 30%;
+    max-width: 30%;
+}
+
+.post-control {
+    margin-top: 10px;
+}
+
 .form-content {
     min-height: 300px;
 }

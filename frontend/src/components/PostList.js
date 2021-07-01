@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PostCard from "./PostCard";
-require("dotenv").config();
 
 function PostList() {
 	// get post from DB and render to component

@@ -9,7 +9,7 @@ function PostForm(props) {
 	const [afterEditLink, setAfterEditLink] = useState(null);
 
 	const apiURLS = {
-		create: "http://localhost:5000/post/create-post",
+		create: `http://localhost:5000/post/create-post`,
 		update: `http://localhost:5000/post/update-post/${props.match.params.postID}`,
 	};
 
@@ -26,7 +26,7 @@ function PostForm(props) {
 		if (e) {
 			e.preventDefault();
 		}
-		setAfterEditLink(post.user);
+		setAfterEditLink(props.userID);
 	};
 
 	const clearFields = () => {
@@ -115,25 +115,6 @@ function PostForm(props) {
 	const submitPostEdit = async (e) => {
 		// Submit edited post, TO BE IMPLEMENTED
 		e.preventDefault();
-		// let postData = {
-		// 	title: post.title,
-		// 	content: post.content,
-		// };
-		// if (e.target.name === "publish-btn") {
-		// 	console.log("publishing");
-		// 	postData.toBePublished = true;
-		// } else {
-		// 	postData.toBePublished = false;
-		// }
-		// const updateResponse = await fetch(apiURLS.update, {
-		// 	method: "PATCH",
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 		Accept: "application/json",
-		// 		Authorization: `Bearer ${props.token}`,
-		// 	},
-		// 	body: JSON.stringify(postData),
-		// });
 		let formData = getFormData();
 		if (e.target.name === "publish-btn") {
 			formData.append("toBePublished", true);
