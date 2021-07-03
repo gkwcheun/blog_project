@@ -6,14 +6,15 @@ function PostDetail(props) {
 	const [commentForm, setCommentForm] = useState(false);
 	const [comment, setComment] = useState(null);
 
-	let apiURL = `http://localhost:5000/post/post-detail/${props.match.params.postID}`;
+	let apiURL = `http://localhost:5000/post/${props.match.params.postID}`;
+
 	const getPost = async () => {
 		// fetch post details from DB and set as state
 		const postResponse = await fetch(apiURL, {
 			method: "GET",
-			headers: {
-				Authorization: `Bearer ${props.token}`,
-			},
+			// headers: {
+			// 	Authorization: `Bearer ${props.token}`,
+			// },
 		});
 		if (postResponse.ok) {
 			const postData = await postResponse.json();
@@ -24,8 +25,10 @@ function PostDetail(props) {
 		return;
 	};
 
-	const toggleCommentForm = (e) => {
-		e.preventDefault();
+	const toggleCommentForm = (e = null) => {
+		if (e) {
+			e.preventDefault();
+		}
 		setCommentForm(!commentForm);
 	};
 
@@ -34,21 +37,45 @@ function PostDetail(props) {
 		setComment(comment);
 	};
 
-	const submitComment = (e) => {
+	const submitComment = async (e) => {
 		e.preventDefault();
-		let apiURL = `http://localhost:5000/post/comments/${props.match.params.postID}`;
+		let apiURL = `http://localhost:5000/comments/${props.match.params.postID}`;
 		const commentData = {
 			user: props.userID,
 			comment: comment,
 		};
-		const postComment = fetch(apiURL, {
+		const postComment = await fetch(apiURL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				Authorization: `Bearer ${props.token}`,
+				// Authorization: `Bearer ${props.token}`,
 			},
 			body: JSON.stringify(commentData),
 		});
+		if (postComment.ok) {
+			console.log("Successfully added comment to database.");
+		} else {
+			console.log("Error adding comment to database");
+		}
+		await getPost();
+		toggleCommentForm();
+	};
+
+	const deleteComment = async (postID, commentID) => {
+		let commentDeleteURL = `http://localhost:5000/post/${postID}/comments/${commentID}`;
+		const deleteResponse = await fetch(commentDeleteURL, {
+			method: "DELETE",
+			headers: {
+				Authorization: `Bearer ${props.token}`,
+			},
+		});
+		if (deleteResponse.ok) {
+			console.log("successfully deleted");
+			// call function to modify post detail state
+			await getPost();
+		} else {
+			console.log("Something went wrong with deletion process");
+		}
 	};
 
 	// set post data to state on component mount
@@ -67,14 +94,18 @@ function PostDetail(props) {
 				<PostCard
 					post={post}
 					editable={false}
-					commentable={true}
+					commentable={props.isLoggedIn}
 					commentPost={toggleCommentForm}
+					deleteComment={deleteComment}
+					commentsViewable={true}
+					currentUserID={props.userID}
+					token={props.token}
 				/>
 			) : (
 				<h1>Loading...</h1>
 			)}
 			{commentForm ? (
-				<form>
+				<form className="comment-form">
 					<textarea
 						className="form-control form-content"
 						id="commentContent"

@@ -62,7 +62,8 @@ function PostForm(props) {
 			body: formData,
 		});
 		if (postRequest.ok) {
-			const postResponse = await postRequest.json();
+			// const postResponse = await postRequest.json();
+			console.log("Successfully added post to database.");
 		} else {
 			console.log("Error adding post to database");
 		}
@@ -84,7 +85,7 @@ function PostForm(props) {
 			body: formData,
 		});
 		if (postRequest.ok) {
-			const postResponse = await postRequest.json();
+			console.log("Successfully saved draft to database.");
 		} else {
 			console.log("Error adding post to database");
 		}

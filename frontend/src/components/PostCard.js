@@ -1,14 +1,20 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import CommentCard from "./CommentCard";
 
 function PostCard(props) {
 	const [imgSrc, setImgSrc] = useState(null);
+	const [comments, setComments] = useState(false);
 
 	const arrayBufferToBase64 = (buffer) => {
 		let binary = "";
 		let bytes = [].slice.call(new Uint8Array(buffer));
 		bytes.forEach((byte) => (binary += String.fromCharCode(byte)));
 		return window.btoa(binary);
+	};
+
+	const showComments = () => {
+		setComments(!comments);
 	};
 
 	// useEffect hook to set imgLink on component mount if there is image in post
@@ -55,11 +61,7 @@ function PostCard(props) {
 			</div>
 			<p className="card-text">{props.post.content}</p>
 			{imgSrc ? (
-				<img
-					className="card-img-bottom post-image"
-					src={imgSrc}
-					alt="post image"
-				/>
+				<img className="card-img-bottom post-image" src={imgSrc} alt="post" />
 			) : null}
 			{props.editable ? (
 				<div className="post-control">
@@ -79,18 +81,43 @@ function PostCard(props) {
 					</button>
 				</div>
 			) : null}
-			{/* Comments section to be implemented */}
-			{props.commentable ? (
+			<div className="comment-control">
+				{/* Comments section to be implemented */}
 				<div className="post-control">
-					<button
-						className="btn btn-primary post-control-btn"
-						id={props.post._id}
-						onClick={props.commentPost}
-					>
-						Comment
-					</button>
+					{props.commentable ? (
+						<button
+							className="btn btn-primary post-control-btn"
+							id={props.post._id}
+							onClick={props.commentPost}
+						>
+							Add Comment
+						</button>
+					) : null}
+					{props.commentsViewable ? (
+						<button
+							className="btn btn-secondary post-control-btn"
+							onClick={showComments}
+						>
+							{`Show Comments (${props.post.comments.length})`}
+						</button>
+					) : null}
 				</div>
-			) : null}
+			</div>
+			{comments
+				? props.post.comments.map((comment) => {
+						console.log(comment.user._id);
+						console.log(props.currentUserID);
+						return (
+							<CommentCard
+								key={comment._id}
+								comment={comment}
+								byCurrentUser={comment.user._id === props.currentUserID}
+								delete={props.deleteComment}
+								postID={props.post._id}
+							/>
+						);
+				  })
+				: null}
 		</div>
 	);
 }

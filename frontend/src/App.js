@@ -11,8 +11,8 @@ import { useState } from "react";
 require("dotenv").config();
 
 function App() {
-	const [userToken, setToken] = useState("");
-	const [userID, setUserID] = useState("");
+	const [userToken, setToken] = useState(null);
+	const [userID, setUserID] = useState(null);
 	const [loggedIn, setLogin] = useState(false);
 	const handleLogin = (userInfo) => {
 		// save jwt to state to be distributed to other components
@@ -21,7 +21,7 @@ function App() {
 		setLogin(true);
 	};
 	const handleLogout = () => {
-		setToken("");
+		setToken(null);
 		setLogin(false);
 	};
 
@@ -60,7 +60,12 @@ function App() {
 						path="/post-detail/:postID"
 						exact
 						render={(props) => (
-							<PostDetail {...props} token={userToken} userID={userID} />
+							<PostDetail
+								{...props}
+								token={userToken}
+								userID={userID}
+								isLoggedIn={loggedIn}
+							/>
 						)}
 					/>
 					<Route
