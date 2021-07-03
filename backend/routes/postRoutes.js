@@ -26,6 +26,43 @@ const fileFilter = (req, res, cb) => {
 
 let upload = multer({ storage, fileFilter });
 
+router.get("/post-detail/:postID", (req, res, next) => {
+	// get post with postID, return json data of post to frontend
+	Post.findById(req.params.postID)
+		.populate("comments")
+		.populate("user", "username")
+		.exec((err, post) => {
+			if (err) {
+				res.json({
+					message: "An error has occured fetching post data",
+					err: err,
+				});
+			} else if (post) {
+				res.json({ post });
+			}
+		});
+});
+
+// router.post("/comments/:postID", (req, res, next) => {
+// 	// post comment and associated user to DB, add comment ID to post
+// 	let comment = new Comment({
+// 		user: req.body.user,
+// 		comment: req.body.comment,
+// 	}).save((err, comment) => {
+// 		if (err) return next(err);
+// 		console.log(comment);
+// 		Post.findByIdAndUpdate(
+// 			req.params.postID,
+// 			{ $push: { comments: comment._id } },
+// 			{ useFindAndModify: false },
+// 			(err, post) => {
+// 				if (err) res.json({ err: err });
+// 				res.json({ message: "New Comment Added!" });
+// 			}
+// 		);
+// 	});
+// });
+
 router.post("/create-post", upload.single("postImage"), (req, res, next) => {
 	// get title, content, toBePublished from form field
 	let imageData = req.file
