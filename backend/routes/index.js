@@ -35,7 +35,7 @@ let upload = multer({ storage, fileFilter });
 router.get("/", (req, res, next) => {
 	Post.find({ published: true })
 		.populate("user", "username profilePicture")
-		.populate("Comment")
+		.populate("comments")
 		.exec((err, posts) => {
 			if (err) {
 				res.json({ message: "Error retreiving posts" });
@@ -54,23 +54,26 @@ router.post("/signup", upload.single("dp"), (req, res, next) => {
 			});
 		} else {
 			// get profile picture data from uploaded file
-			let profilePictureData = fs.readFileSync(req.file.path);
-			console.log(profilePictureData);
 			bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
 				if (err) return next(err);
-				const user = new User({
+				let userData = {
 					username: req.body.username,
 					password: hashedPassword,
-					profilePicture: {
-						data: profilePictureData,
-						contentType: "image/jpg",
-					},
-				}).save((err) => {
+				};
+				if (req.file) {
+					userData.profilePicture = {
+						data: fs.readFileSync(req.file.path),
+						contentType: "image/jpeg",
+					};
+				}
+				let user = new User({ ...userData });
+				user.save((err) => {
 					if (err) return next(err);
 					res.json({
 						message: `User with username: ${req.body.username} created`,
 					});
 				});
+				console.log(user);
 			});
 		}
 	});
@@ -100,6 +103,45 @@ router.post("/login", function (req, res, next) {
 
 router.post("/logout", (req, res, next) => {
 	res.json({ message: "To be implemented" });
+});
+
+router.get("/post/:postID", (req, res, next) => {
+	// get post with postID, return json data of post to frontend
+	Post.findById(req.params.postID)
+		.populate({ path: "comments", populate: { path: "user" } })
+		.populate("user", "username")
+		.exec((err, post) => {
+			if (err) {
+				res.json({
+					message: "An error has occured fetching post data",
+					err: err,
+				});
+			} else if (post) {
+				res.json({ post });
+			}
+		});
+});
+
+// post comment
+router.post("/comments/:postID", (req, res, next) => {
+	// post comment and associated user to DB, add comment ID to post
+	let comment = new Comment({
+		user: req.body.user,
+		comment: req.body.comment,
+		datePosted: Date.now(),
+	}).save((err, comment) => {
+		if (err) return next(err);
+		console.log(comment);
+		Post.findByIdAndUpdate(
+			req.params.postID,
+			{ $push: { comments: comment._id } },
+			{ useFindAndModify: false },
+			(err, post) => {
+				if (err) res.json({ err: err });
+				res.json({ message: "New Comment Added!" });
+			}
+		);
+	});
 });
 
 module.exports = router;

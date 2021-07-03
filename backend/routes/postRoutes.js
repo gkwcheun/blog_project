@@ -26,45 +26,6 @@ const fileFilter = (req, res, cb) => {
 
 let upload = multer({ storage, fileFilter });
 
-// routes definition
-
-router.get("/post-detail/:postID", (req, res, next) => {
-	// get post with postID, return json data of post to frontend
-	Post.findById(req.params.postID)
-		.populate("comments")
-		.populate("user", "username")
-		.exec((err, post) => {
-			if (err) {
-				res.json({
-					message: "An error has occured fetching post data",
-					err: err,
-				});
-			} else if (post) {
-				res.json({ post });
-			}
-		});
-});
-
-router.post("/comments/:postID", (req, res, next) => {
-	// post comment and associated user to DB, add comment ID to post
-	let comment = new Comment({
-		user: req.body.user,
-		comment: req.body.comment,
-	}).save((err, comment) => {
-		if (err) return next(err);
-		console.log(comment);
-		Post.findByIdAndUpdate(
-			req.params.postID,
-			{ $push: { comments: comment._id } },
-			{ useFindAndModify: false },
-			(err, post) => {
-				if (err) res.json({ err: err });
-				res.json({ message: "New Comment Added!" });
-			}
-		);
-	});
-});
-
 router.post("/create-post", upload.single("postImage"), (req, res, next) => {
 	// get title, content, toBePublished from form field
 	let imageData = req.file
@@ -154,6 +115,38 @@ router.delete("/delete-post/:postID", (req, res, next) => {
 						});
 					} else {
 						res.json({ message: "Successfully deleted post." });
+					}
+				});
+			}
+		}
+	);
+});
+
+// route to delete comment from post
+router.delete("/:postID/comments/:commentID", (req, res, next) => {
+	// delete comment and remove reference to commment in post document
+	Post.findByIdAndUpdate(
+		req.params.postID,
+		{
+			$pull: { comments: req.params.commentID },
+		},
+		{ useFindAndModify: false },
+		(err, post) => {
+			if (err) {
+				res.json({
+					message: "Something went wrong removing comment from post.",
+					err: err,
+				});
+			} else if (post) {
+				// find comment by ID and delete
+				Comment.findByIdAndDelete(req.params.commentID, (err) => {
+					if (err) {
+						res.json({
+							message: "Something went wrong deleting comment.",
+							err: err,
+						});
+					} else {
+						res.json({ message: "Successfully deleted comment." });
 					}
 				});
 			}
