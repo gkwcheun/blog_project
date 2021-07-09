@@ -27,10 +27,10 @@ const fileFilter = (req, res, cb) => {
 let upload = multer({ storage, fileFilter });
 
 router.get("/post-detail/:postID", (req, res, next) => {
-	// get post with postID, return json data of post to frontend
+	// get post with postID, return json data of post to frontend'
 	Post.findById(req.params.postID)
-		.populate("comments")
-		.populate("user", "username")
+		.populate({ path: "comments", populate: { path: "user" } })
+		.populate({ path: "user", populate: { path: "profilePicture" } })
 		.exec((err, post) => {
 			if (err) {
 				res.json({

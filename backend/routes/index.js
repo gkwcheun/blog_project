@@ -9,6 +9,7 @@ const fs = require("fs");
 const User = require("../models/user");
 const Post = require("../models/post");
 const Comment = require("../models/comment");
+const ProfilePic = require("../models/ProfilePic");
 const router = express.Router();
 
 // multer config
@@ -34,12 +35,12 @@ let upload = multer({ storage, fileFilter });
 
 router.get("/", (req, res, next) => {
 	Post.find({ published: true })
-		.populate("user", "username profilePicture")
-		.populate("comments")
+		.populate({ path: "user", populate: { path: "profilePicture" } })
 		.exec((err, posts) => {
 			if (err) {
 				res.json({ message: "Error retreiving posts" });
 			} else {
+				// console.log(posts);
 				res.json({ message: "Successfully retrieved posts", posts: posts });
 			}
 		});
@@ -61,19 +62,54 @@ router.post("/signup", upload.single("dp"), (req, res, next) => {
 					password: hashedPassword,
 				};
 				if (req.file) {
-					userData.profilePicture = {
-						data: fs.readFileSync(req.file.path),
-						contentType: "image/jpeg",
-					};
-				}
-				let user = new User({ ...userData });
-				user.save((err) => {
-					if (err) return next(err);
-					res.json({
-						message: `User with username: ${req.body.username} created`,
+					let dp = new ProfilePic({
+						profilePicture: {
+							data: fs.readFileSync(req.file.path),
+							contentType: "image/jpeg",
+						},
 					});
-				});
-				console.log(user);
+					dp.save((err, picture) => {
+						if (err) return next(err);
+						else {
+							userData.profilePicture = picture._id;
+							let user = new User({ ...userData });
+							user.save((err, user) => {
+								if (err) return next(err);
+								else {
+									ProfilePic.findByIdAndUpdate(
+										picture._id,
+										{
+											user: user._id,
+										},
+										{ useFindAndModify: false },
+										(err) => {
+											if (err) {
+												res.json({
+													message:
+														"Error occured while saving profile pic to user",
+													err: err,
+												});
+											}
+										}
+									);
+									res.json({
+										message: `User with username: ${req.body.username} created`,
+									});
+								}
+							});
+							// console.log(user);
+						}
+					});
+				} else {
+					let user = new User({ ...userData });
+					user.save((err) => {
+						if (err) return next(err);
+						res.json({
+							message: `User with username: ${req.body.username} created`,
+						});
+					});
+					console.log(user);
+				}
 			});
 		}
 	});
@@ -108,8 +144,22 @@ router.post("/logout", (req, res, next) => {
 router.get("/post/:postID", (req, res, next) => {
 	// get post with postID, return json data of post to frontend
 	Post.findById(req.params.postID)
-		.populate({ path: "comments", populate: { path: "user" } })
-		.populate("user", "username")
+		.populate([
+			{
+				path: "comments",
+				populate: {
+					path: "user",
+					select: "username profilePicture",
+				},
+			},
+		])
+		.populate({
+			path: "comments",
+			populate: {
+				path: "user.profilePicture",
+			},
+		})
+		.populate({ path: "user", populate: { path: "profilePicture" } })
 		.exec((err, post) => {
 			if (err) {
 				res.json({
@@ -131,7 +181,7 @@ router.post("/comments/:postID", (req, res, next) => {
 		datePosted: Date.now(),
 	}).save((err, comment) => {
 		if (err) return next(err);
-		console.log(comment);
+		// console.log(comment);
 		Post.findByIdAndUpdate(
 			req.params.postID,
 			{ $push: { comments: comment._id } },
