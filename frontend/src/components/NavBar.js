@@ -7,7 +7,7 @@ function NavBar(props) {
 		<nav className="nav-bar">
 			<h1 className="logo">
 				<Link className="logo-link" to="/">
-					GalvinBlog
+					The Blog
 				</Link>
 			</h1>
 			{props.loggedIn ? (

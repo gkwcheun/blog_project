@@ -149,18 +149,18 @@ function PostForm(props) {
 	}, []);
 
 	// use effect function just to see state for debugging purposes
-	useEffect(() => {
-		console.log(post);
-	}, [post]);
+	// useEffect(() => {
+	// 	console.log(post);
+	// }, [post]);
 
 	// use effect function just to see state for debugging purposes
-	useEffect(() => {
-		console.log(postImage);
-	}, [postImage]);
+	// useEffect(() => {
+	// 	console.log(postImage);
+	// }, [postImage]);
 
-	useEffect(() => {
-		console.log(afterEditLink);
-	}, [afterEditLink]);
+	// useEffect(() => {
+	// 	console.log(afterEditLink);
+	// }, [afterEditLink]);
 
 	if (afterEditLink) {
 		// redirect user after post submit, post edit, or cancel

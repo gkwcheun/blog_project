@@ -4,6 +4,7 @@ import CommentCard from "./CommentCard";
 
 function PostCard(props) {
 	const [imgSrc, setImgSrc] = useState(null);
+	const [profilePic, setProfilePic] = useState(null);
 	const [comments, setComments] = useState(false);
 
 	const arrayBufferToBase64 = (buffer) => {
@@ -24,6 +25,15 @@ function PostCard(props) {
 			let source = base64flag + arrayBufferToBase64(props.post.image.data.data);
 			setImgSrc(source);
 		}
+		if (props.post.user.profilePicture) {
+			let base64flag = "data:image/jpeg;base64, ";
+			let source =
+				base64flag +
+				arrayBufferToBase64(
+					props.post.user.profilePicture.profilePicture.data.data
+				);
+			setProfilePic(source);
+		}
 	}, []);
 
 	// used for debugging purposes, see if imgSrc is being set properly
@@ -35,29 +45,36 @@ function PostCard(props) {
 
 	return (
 		<div className="card" key={props.post._id}>
-			<h1 className="card-title">
-				<Link className="react-link" to={`/post-detail/${props.post._id}`}>
-					{props.post.title}
-				</Link>
-			</h1>
-			<div className="sub-text">
-				{props.editable ? null : (
-					<small className="card-subtitle mb-2 text-muted user-subtitle">
-						<span>By: </span>
-						<Link className="react-link" to={`/profile/${props.post.user._id}`}>
-							{props.post.user.username}
+			<div className="post-header-container">
+				<img className="profile-pic" src={profilePic} alt="profile-pic"></img>
+				<div className="post-header-info">
+					<h1 className="card-title post-title">
+						<Link className="react-link" to={`/post-detail/${props.post._id}`}>
+							{props.post.title}
 						</Link>
-					</small>
-				)}
-				<small className="card-subtitle mb-2 text-muted">
-					{props.post.datePosted}
-				</small>
-				<br />
-				{props.post.published ? null : (
-					<small className="card-subtitle mb-2 draft-text">
-						<strong>DRAFT</strong>
-					</small>
-				)}
+					</h1>
+					<div className="sub-text">
+						{props.editable ? null : (
+							<small className="card-subtitle mb-2 text-muted user-subtitle">
+								<Link
+									className="react-link"
+									to={`/profile/${props.post.user._id}`}
+								>
+									{props.post.user.username}
+								</Link>
+							</small>
+						)}
+						<small className="card-subtitle mb-2 text-muted">
+							{props.post.datePosted}
+						</small>
+						<br />
+						{props.post.published ? null : (
+							<small className="card-subtitle mb-2 draft-text">
+								<strong>DRAFT</strong>
+							</small>
+						)}
+					</div>
+				</div>
 			</div>
 			<p className="card-text">{props.post.content}</p>
 			{imgSrc ? (

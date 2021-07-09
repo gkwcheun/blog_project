@@ -19,6 +19,15 @@ function Profile(props) {
 		});
 		if (fetchResponse.ok) {
 			const profileData = await fetchResponse.json();
+			let profilePosts = profileData.posts.map((post) => {
+				post.user = {
+					username: profileData.username,
+					userID: profileData.userID,
+					profilePicture: profileData.profilePicture,
+				};
+				return post;
+			});
+			profileData.posts = profilePosts;
 			setProfile(profileData);
 		} else {
 			console.log("Error fetching profile from database");
@@ -34,9 +43,9 @@ function Profile(props) {
 		setPostLink(null);
 	}, []);
 	// logging profile state for debugging reasons
-	// useEffect(() => {
-	// 	console.log(profile);
-	// }, [profile]);
+	useEffect(() => {
+		console.log(profile);
+	}, [profile]);
 
 	const editPost = (e) => {
 		e.preventDefault();

@@ -7,23 +7,34 @@ import NavBar from "./components/NavBar";
 import Signup from "./components/Signup";
 import Profile from "./components/Profile";
 import PostDetail from "./components/PostDetail";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 require("dotenv").config();
 
 function App() {
 	const [userToken, setToken] = useState(null);
 	const [userID, setUserID] = useState(null);
 	const [loggedIn, setLogin] = useState(false);
+
 	const handleLogin = (userInfo) => {
 		// save jwt to state to be distributed to other components
+		console.log("handle login called");
 		setToken(userInfo.token);
 		setUserID(userInfo.userID);
 		setLogin(true);
 	};
 	const handleLogout = () => {
+		console.log("handle logout");
 		setToken(null);
 		setLogin(false);
 	};
+
+	useEffect(() => {
+		console.log(userToken);
+	}, [userToken]);
+
+	useEffect(() => {
+		console.log(userID);
+	}, [userID]);
 
 	return (
 		<div className="app-body">
