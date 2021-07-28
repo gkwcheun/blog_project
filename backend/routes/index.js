@@ -108,7 +108,7 @@ router.post("/signup", upload.single("dp"), (req, res, next) => {
 							message: `User with username: ${req.body.username} created`,
 						});
 					});
-					console.log(user);
+					// console.log(user);
 				}
 			});
 		}
@@ -150,16 +150,21 @@ router.get("/post/:postID", (req, res, next) => {
 				populate: {
 					path: "user",
 					select: "username profilePicture",
+					populate: { path: "profilePicture" },
 				},
 			},
 		])
+		// .populate({
+		// 	path: "comments",
+		// 	populate: {
+		// 		path: "user.profilePicture",
+		// 	},
+		// })
 		.populate({
-			path: "comments",
-			populate: {
-				path: "user.profilePicture",
-			},
+			path: "user",
+			select: "username profilePicture",
+			populate: { path: "profilePicture" },
 		})
-		.populate({ path: "user", populate: { path: "profilePicture" } })
 		.exec((err, post) => {
 			if (err) {
 				res.json({
