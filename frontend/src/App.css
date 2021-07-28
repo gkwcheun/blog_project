@@ -143,6 +143,24 @@ a:hover {
     margin-bottom: 15px;
 }
 
+
 .post-header-info {
     margin-left: 10px;
+}
+
+.comment-header-container{
+    display: flex;
+    margin-bottom: 15px;
+}
+
+
+.comment-header-info {
+    margin-left: 10px;
+    margin-top: 20px;
+}
+
+.comment-dp {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
 }

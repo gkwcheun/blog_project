@@ -34,6 +34,7 @@ function PostCard(props) {
 				);
 			setProfilePic(source);
 		}
+		console.log(props);
 	}, []);
 
 	// used for debugging purposes, see if imgSrc is being set properly
@@ -132,8 +133,9 @@ function PostCard(props) {
 			</div>
 			{comments
 				? props.post.comments.map((comment) => {
-						console.log(comment.user._id);
-						console.log(props.currentUserID);
+						// console.log(comment.user._id);
+						// console.log(props.currentUserID);
+						console.log(comment);
 						return (
 							<CommentCard
 								key={comment._id}
@@ -141,6 +143,7 @@ function PostCard(props) {
 								byCurrentUser={comment.user._id === props.currentUserID}
 								delete={props.deleteComment}
 								postID={props.post._id}
+								pictureProcessor={arrayBufferToBase64}
 							/>
 						);
 				  })
